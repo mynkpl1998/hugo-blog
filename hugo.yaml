@@ -11,7 +11,8 @@ params:
     icon: /command.svg
     iconHeight: 25
 
-  defaultTheme: auto
+  defaultTheme: light
+  disableThemeToggle: true
   
   profileMode:
     enabled: false # needs to be explicitly set
