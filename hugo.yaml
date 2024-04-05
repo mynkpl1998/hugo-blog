@@ -5,16 +5,16 @@ paginate: 5
 theme: PaperMod
 
 params:
-
   # Top right 
   label:
     text: "Mayank Kumar Pal"
     icon: /command.svg
     iconHeight: 25
 
+  defaultTheme: auto
   
   profileMode:
-    enabled: true # needs to be explicitly set
+    enabled: false # needs to be explicitly set
     title: "Welcome! \U0001F44B"
     subtitle: "I’m an **AI Engineer at Qualcomm**, passionate about embedded systems, On-Device Machine Learning, Reinforcement Learning, and IoT. Whenever I’m free, I dive into learning new advances in IoT and ML."
     imageUrl: "/profile.jpg"
@@ -23,20 +23,42 @@ params:
     imageTitle: "Mayank Kumar Pal"
     buttons:
       - name: Blog
-        url: blogs
+        url: blog
       - name: Projects
         url: projects
+  
+  homeInfoParams:
+    Title: "[~]$ whoami "
+    Content: "I’m an **AI Engineer at Qualcomm**, passionate about embedded systems, On-Device Machine Learning, Reinforcement Learning, and IoT. Whenever I’m free, I dive into learning new advances in IoT and ML.
+    <br>
+    You can reach out to me at [mynkpl1998@gmail.com](mailto:mynkpl1998@gmail.com)."
+  
+  socialIcons: # optional
+  - name: "linkedIn"
+    url: "https://www.linkedin.com/in/mayank-kumar-pal/"
+  - name: "github"
+    url: "https://github.com/mynkpl1998/"
+  - name: "twitter"
+    url: "https://twitter.com/mynkpl"
+  - name: "googlescholar"
+    url: "https://scholar.google.co.in/citations?user=ZVRzQ9AAAAAJ&hl=en"
 
 menu:
   main:
+
+    - identifer: about
+      name: About Me
+      url: /about/
+      weight: 30
+
     - identifier: publications
       name: Publications
       url: /publications/
       weight: 30
     
-    - identifier: blogs
-      name: Blogs
-      url: /blogs/
+    - identifier: blog
+      name: Blog
+      url: /blog/
       weight: 30
 
     - identifier: projects
