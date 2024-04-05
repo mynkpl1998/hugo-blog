@@ -27,14 +27,15 @@ For these methods, the policy $ \pi $, is a function that maps the state $ s $, 
 
 In practice, the actions seen by the agent during learning are highly influenced by the initialization of the parameters of the policy. To encourage exploration, a stochastic mapping or a distribution over actions is preferred instead of a deterministic mapping. Sampling actions from this distibution allows for some randomness and thus helps the agent to explore during learning without going off-policy. Therefore, it is common to learn a parameterized distribution (pdf/pmf) over actions, conditioned on the state for such methods, $ \pi_{\theta}(a \vert s) $. 
 
-> NOTE: The policy mapping could be any function as long as it is differentiable w.r.t to parameters $ \theta $ and $ \nabla_{\theta} \pi_{\theta}(a \vert s) $ always exists and is finite, $ \forall s \in S, a \in A(s) $.
+> ***Note**: The policy mapping could be any function as long as it is differentiable w.r.t to parameters $ \theta $ and $ \nabla_{\theta} \pi_{\theta}(a \vert s) $ always exists and is finite, $ \forall s \in S, a \in A(s) $*.
 
 
 The goal of these methods is to learn the parameters for the policy that maximizes the expected return of the trajectories, $ J(\pi_{\theta}) = \mathbb{E}[ R(\tau) ] $, where $ R(\tau) $ corresponds to the *undiscounted sum of rewards* of the trajectory $ \tau $. The trajectory $ \tau $, corresponds to the sequence of states and actions $ (s_{0}, a_{0}, s_{1}, a_{1}, ..., a_{T-1}, s_{T}), $ which agent experiences. The expectation is over the initial state-distribution, $ s_{0} \sim \mu(s) $, environment dynamics, $ \bar{s} \sim P(s_{t+1} \vert s_{t}, a_{t}) $ and actions sampled using policy, $ a \sim \pi_{\theta}(a_{t} \vert s_{t}) $.
 
-> NOTE : We assume, no discounting ($ \gamma $ = 1) and finite horizon (episodic) task. However, the same is true for $ \gamma \neq 1 $ but may not apply to non-episodic tasks. For infinite horizon (non-episodic) tasks, performance is defined in terms of the average rate of reward per time step. For more details, please have a look at [Introduction to Reinforcement Learning, Sutton & Barto, Second Edition, Draft 2017, Chapter-13.6](http://incompleteideas.net/book/bookdraft2017nov5.pdf).
 
-> NOTE: From now on, we will use $ k $ to denote the policy parameters update step and $ t $ to denote the episode time step.
+> ***Note** : We assume, no discounting ($ \gamma $ = 1) and finite horizon (episodic) task. The same is true for $ \gamma \neq 1 $ but may not apply to non-episodic tasks. For infinite horizon (non-episodic) tasks, performance is defined in terms of the average rate of reward per time step. For more details, please have a look at **Introduction to Reinforcement Learning, Sutton & Barto, Second Edition, Draft 2017, Chapter-13.6***
+
+> ***Note**: From now on, we will use $ k $ to denote the policy parameters update step and $ t $ to denote the episode time step*.
 
 The parameters of the policy are updated by running the gradient ascent on $ J(\pi_{\theta_{k}} ) $. The parameter update rule is given by equation $ (\ref{policy_update_rule}) $, where $ \alpha $ is the learning rate. It is possible to use $ \alpha_{k} $ instead of fixed learning rate. Most of the state-of-the-art optimizers like Adam, RMSProp, etc., uses an adaptive learning rate to scale the learning rate based upon the statistics of the past gradients.
 
