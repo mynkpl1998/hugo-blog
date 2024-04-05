@@ -58,9 +58,9 @@
 
 .entry-header h1::after {
     content: "";
-    width: 15px;
+    width: 13px;
     height: 35px;
-    background: #000000;
+    background: var(--content);
     display: inline-block;
 }
 
@@ -72,18 +72,21 @@
 
 @keyframes cursor-blink {
     0% {
-      opacity: 0;
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
     }
 }
 
 .entry-header h1::after {
     /*code commented for brevity*/
-    animation: cursor-blink 1.5s steps(2) infinite;
+    animation: cursor-blink 2.0s steps(2) infinite;
 }
 
 .entry-content {
     margin: 8px 0;
-    color: var(--secondary);
+    color: var(--content);
     font-size: 14px;
     line-height: 1.6;
     overflow: hidden;
@@ -93,7 +96,7 @@
 }
 
 .entry-footer {
-    color: var(--secondary);
+    color: var(--content);
     font-size: 13px;
 }
 
