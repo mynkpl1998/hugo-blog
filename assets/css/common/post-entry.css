@@ -81,7 +81,7 @@
 
 .entry-header h1::after {
     /*code commented for brevity*/
-    animation: cursor-blink 2.0s steps(2) infinite;
+    animation: cursor-blink 1.0s steps(2) infinite;
 }
 
 .entry-content {
@@ -133,4 +133,42 @@
 .entry-cover a {
     color: var(--secondary);
     box-shadow: 0 1px 0 var(--primary);
+}
+
+.entry-content-col1 {
+    width: 75%;
+    float: left;
+}
+
+.entry-content-col2 {
+    width: 25%;
+    float: right;
+}
+
+/* Create two unequal columns that floats next to each other */
+.entry-content-column {
+    float: left;
+    padding: 10px;
+}
+  
+.left {
+    width: 75%;
+}
+  
+.right {
+    width: 25%;
+}
+  
+/* Clear floats after the columns */
+.entry-content-row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Clear floats after the columns */
+.entry-content-row:after {
+    content: "";
+    display: table;
+    clear: both;
 }

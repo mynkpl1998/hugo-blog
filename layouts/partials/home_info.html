@@ -1,10 +1,25 @@
 {{- with site.Params.homeInfoParams }}
 <article class="first-entry home-info">
     <header class="entry-header">
-        <h1>{{ .Title | markdownify }} </h1>
+        <h1> <p style="color: #A34343;">[~]$</p> {{ .Title | markdownify }} </h1>
     </header>
     <div class="entry-content">
-        {{ .Content | markdownify }}
+        
+        
+        <div class="entry-content-row">
+            <div class="entry-content-column left">
+                {{ .Content | markdownify }}
+            </div>
+            <div class="entry-content-column right">
+                <img src="/profile.jpg" width="250px" style="border:3px solid #000000">
+            </div>
+        </div>
+
+            <div class="entry-content-col1">  </div>
+            <div class="entry-content-col2">
+                
+            </div>
+        
     </div>
     <footer class="entry-footer">
         {{ partial "social_icons.html" (dict "align" site.Params.homeInfoParams.AlignSocialIconsTo) }}

@@ -29,7 +29,7 @@ params:
         url: projects
   
   homeInfoParams:
-    Title: "[~]$ whoami "
+    Title: "whoami"
     Content: "I’m an **AI Engineer at Qualcomm**, passionate about embedded systems, On-Device Machine Learning, Reinforcement Learning, and IoT. Whenever I’m free, I dive into learning new advances in IoT and ML.
     <br>
     You can reach out to me at [mynkpl1998@gmail.com](mailto:mynkpl1998@gmail.com)."
@@ -44,6 +44,9 @@ params:
   - name: "googlescholar"
     url: "https://scholar.google.co.in/citations?user=ZVRzQ9AAAAAJ&hl=en"
 
+  mailInfo:
+    id: mynkpl1998@gmail.com
+  
 menu:
   main:
 
