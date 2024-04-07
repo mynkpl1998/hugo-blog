@@ -1,7 +1,7 @@
 
 ## About Me
 
-Hello, I’m Mayank Kumar Pal. I’m from New Delhi, India 🇮🇳. Working as the **Senior Engineer at Qualcomm, Bangalore** in the AI Software Stack Team for Automotive Buisness Unit. 
+Hello, I’m Mayank Kumar Pal. I’m from New Delhi, India 🇮🇳. Working as the **Senior Engineer at Qualcomm, Bangalore** in the AI SW Team for Automotive Buisness Unit. 
 
 My interest spans area such as **On-Device Machine Learning**, **Large Language Models(LLMs)**, **Reinforcement learning**, and **Embedded Systems**. I received my Bachelor’s and Master’s degree from IIIT-Delhi, Indraprastha Institute of Information Technology (IIIT-Delhi) in Electronics and Communications Engineering (ECE), where I was advised by [Prof. Sanjit K. Kaul](https://sites.google.com/view/sanjitkkaul/) and [Prof. Saket Anand](https://www.iiitd.edu.in/~anands/).
 
