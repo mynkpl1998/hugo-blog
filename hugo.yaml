@@ -30,9 +30,9 @@ params:
   
   homeInfoParams:
     Title: "whoami"
-    Content: "I’m an **AI Engineer at Qualcomm**, passionate about embedded systems, On-Device Machine Learning, Reinforcement Learning, and IoT. Whenever I’m free, I dive into learning new advances in IoT and ML.
-    <br>
-    You can reach out to me at [mynkpl1998@gmail.com](mailto:mynkpl1998@gmail.com)."
+    Content: "Hi, I am an **AI Software Engineer @ Qualcomm**. I'm passionate about building intelligent systems at the edge. My expertise lies in Embedded Systems, On-Device AI, Reinforcement Learning, and Machine Learning. I'm always eager to learn and collaborate on innovative projects."
+    MailInfo: "mynkpl1998@gmail.com"
+    About: about
   
   socialIcons: # optional
   - name: "linkedIn"
@@ -44,9 +44,6 @@ params:
   - name: "googlescholar"
     url: "https://scholar.google.co.in/citations?user=ZVRzQ9AAAAAJ&hl=en"
 
-  mailInfo:
-    id: mynkpl1998@gmail.com
-  
 menu:
   main:
 
