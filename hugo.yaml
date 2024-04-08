@@ -1,4 +1,4 @@
-baseURL: "https://examplesite.com/"
+baseURL: "https://mynkpl1998.github.io/"
 languageCode: en-us
 title: Mayank Kumar Pal
 paginate: 5
@@ -48,7 +48,7 @@ menu:
   main:
 
     - identifer: about
-      name: About Me
+      name: About
       url: /about/
       weight: 30
 
