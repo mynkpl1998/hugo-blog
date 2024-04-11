@@ -1,5 +1,62 @@
-<html>
-    <body>
-        Hello
-    </body>
-</html>
+{{- define "main" }}
+
+{{- with site.Params.aboutMe }}
+<article class="post-single">
+  
+  <div class="post-content">
+    
+    <h1> About Me </h1>
+
+    {{ .heading | markdownify }}
+    <br>
+    <br>
+    {{ .Content | markdownify }}
+    
+  </div>
+
+  <br>
+  <br>
+
+  <div class="post-content">
+    <h1>Work Experience</h1>
+  </div>
+
+  <div class="timeline">
+    <ul>
+      <li>
+        <div class="content">
+          <h3>Event 1</h3>
+          <p>Event 1 Description</p>
+        </div>
+        <div class="point"></div>
+        <div class="date">
+          <h4>January 2020</h4>
+        </div>
+      </li>
+      <li>
+        <div class="content">
+          <h3>Event 2</h3>
+          <p>Event 2 Description</p>
+        </div>
+        <div class="point"></div>
+        <div class="date">
+          <h4>July 2019</h4>
+        </div>
+      </li>
+      <li>
+        <div class="content">
+          <h3>Event 3</h3>
+          <p>Event 3 Description</p>
+        </div>
+        <div class="point"></div>
+        <div class="date">
+          <h4>March 2019</h4>
+        </div>
+      </li>
+      ...
+    </ul>
+  </div>
+
+</article>
+{{- end }}
+{{- end }}{{/* end main */}}

@@ -42,6 +42,10 @@ The main property of XOR is that it keep the bit same if both operands are same,
 | A ^ B ^ A     | B      |
 | A ^ B ^ B     | A      |
 
+# Few properties of Shift operators.
+
+1. Left shifting the number by 1 - Multiplies the number by 2.
+2. Right shifting the number by 1 - Divides the number by 2.
 
 ### Setting a particular bit of register or variable.
 
@@ -238,3 +242,19 @@ To check if the number is positive or negative, we can simply check the sign at 
     else
         printf("a is positive\n");
 ```
+
+### Swap endianess of a 32-bit integer.
+
+Example:
+* Little Endian: 0000 0000 0000 0000 0000 0000 0001 0000
+* Big Endian:    0000 0001 0000 0000 0000 0000 0000 0000
+
+To swap the endianess, create a mask for each bytes to extract their value. The mask values are then ORed together at the correct positions to get the final value.
+
+```C
+    unsigned int a = 16;
+    unsigned int swapped_a = ((0xFF & a) << 24) | ((0xFF00 & a) << 8) | ((0xFF0000 & a) >> 8) | ((0xFF000000 & a) >> 24);
+```
+
+### Clear all the LSB bits from a given position.
+
