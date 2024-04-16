@@ -1,8 +1,8 @@
-### Download Hugo
+# Download Hugo
 
 Download the Hugo v0.124.1 from [here](https://github.com/gohugoio/hugo/releases/tag/v0.124.1).
 
-### How to Run ?
+# How to Run ?
 
 ```bash
 cd hugo-blog
