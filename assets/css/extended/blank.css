@@ -86,14 +86,6 @@ Read https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#bundling-custom-cs
 }
 
 
-span img {
-	float: left;
-}
-
-span small {
-	display: block;
-}
-
 .timeline::before {
     content: "";
     position: absolute;
