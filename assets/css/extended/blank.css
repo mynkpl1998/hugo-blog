@@ -39,6 +39,20 @@ Read https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#bundling-custom-cs
     padding-left: 30px;
 }
 
+.content_logo {
+    float: left;
+    position: relative;
+    top: 50%;
+    transform: translateY(+50%);
+    margin-right: 15px; /* Add some spacing between image and text */
+}
+
+.content_desc {
+    text-align: left; /* Align text to the left */
+    overflow: hidden;
+}
+
+
 
 .timeline ul li .date {
     width: 30%;
