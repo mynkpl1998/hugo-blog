@@ -3,6 +3,10 @@ languageCode: en-us
 title: Mayank Kumar Pal
 paginate: 5
 theme: PaperMod
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
 
 params:
 
