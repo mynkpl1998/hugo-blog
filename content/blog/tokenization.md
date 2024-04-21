@@ -2,6 +2,7 @@
 title = 'Tokenization'
 date = 2024-04-19T10:16:36-07:00
 draft = false
+tags = [ "LLM", "Tokenization", "BPE", "GPT"]
 +++
 
 ### What is tokenization ?
