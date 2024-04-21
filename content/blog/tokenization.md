@@ -7,7 +7,18 @@ draft = false
 ### What is tokenization ?
 
 Machine learning models operate on numerical representations of input data. Language models, such as LLMs, work with text input.
-Tokenization is the process of converting the text into smaller chunks called tokens, which are then assigned a numerical representations. 
+Tokenization is the process of converting the text into smaller chunks called tokens, which are then assigned numerical representations. 
+The collection of unique tokens forms what we call a vocabulary. It is essentially a dictionary that maps each token to a unique integer. The size of the vocabulary is determined by the number of unique tokens in the corpus.
+
+The vocabulary sizes of some popular LLMs are as follows:
+
+* GPT-2: The vocabulary size is 50,257.
+* GPT-3: The vocabulary size is approximately 175 billion.
+* Llama 1: The vocabulary size is 32,000.
+* Llama 2: The vocabulary size is also 32,000.
+
+Larger vocabularies allow the model to understand and generate a wider range of words and phrases. However, they also require more computational resources (embedding size and softmax size increases) to train and use.
+
 
 Broadly there are three types of tokenization we can do:
 
@@ -18,7 +29,7 @@ Broadly there are three types of tokenization we can do:
 3. **Sub Word Tokenization**: This method splits the text into smaller meaningful units, such as n-grams (sequence of n adjacent symbols). Some of the ways to do subword tokenization are: 
 
     <p align="center">
-        <img src="/blog-content/tokenization/tokenization_n_gram.svg" />
+        <img src="/blog-content/tokenization/tokenization_n_grams.svg" />
     </p>
 
     - Byte Pair Encoding (BPE): Merges the frequent pair of tokens into single token. 
@@ -130,7 +141,7 @@ We have discussed the importance of token count and how a tokenizer that can tok
 
 The context length of LLMs is the maximum number of tokens a model can process at once, meaning it is the number of tokens to which the model can attend. Context length plays a crucial role in LLMs and affects their ability to retain and attend to information from very old sequences. This directly impacts the quality of tasks such as summarization, long-term planning, and coherence in conversations.
 
-Therefore, it is **essential to have a tokenizer that can efficiently compress and tokenize the input text in the smallest number of tokens possible**.
+Therefore, it is **essential to have a tokenizer that can efficiently compress and tokenize the input text in the smallest number of tokens possible** to take advantage of the available context length.
 
 The context length of some popular LLMs are as follows:
 
@@ -139,3 +150,7 @@ The context length of some popular LLMs are as follows:
 * GPT-4: 32k tokens
 * Llama 1: 2,048 tokens
 * Llama 2: 4,096 tokens
+
+<br>
+
+
