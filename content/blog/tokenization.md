@@ -102,4 +102,40 @@ The same English text in the Korean language occupies more tokens. This can be d
    - Dataset Bias:  GPT might be trained on datasets with a larger proportion of English text compared to Korean. This can lead the tokenizer to be more efficient at handling English. As a result, it might need more tokens to represent the same meaning in Korean.
    - Korean language characteristics: Korean inherently uses more characters per word than English. This simply means that Korean needs more building blocks to express the same idea, leading to a higher token count.
 
-GPT-2 performs well with programming languages like Python, achieving a lower token count. However, it seems to be struggling with Python indentation, requiring multiple tokens to represent it. 
+GPT-2 doesn’t perform well with programming languages like Python. It seems to struggle with Python indentation, often requiring multiple tokens to represent it. On the other hand, GPT-4 excels at identifying Python indentation, resulting in a lower token count for the same code snippet. 
+
+<table style="width:100% ">
+  <tr>
+    <th style="width:50%; text-align: center">Tokenized (GPT-4)</th>
+    <th style="text-align: center">Tokenized (GPT-2)</th>
+  </tr>
+  
+  <tr>
+    <td>
+        <p style="text-align: center">Token Count: 51</p>
+        <img src="/blog-content/tokenization/python_gpt4_vis.png"/>
+    </td>
+    <td>
+        <p style="text-align: center">Token Count: 63</p>
+        <img src="/blog-content/tokenization/python_gpt2_vis.png"/>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+### Context Length
+
+We have discussed the importance of token count and how a tokenizer that can tokenize input using a small number of tokens is desirable. The reason for a lower token count is due to the context length of Language Models (LLMs).
+
+The context length of LLMs is the maximum number of tokens a model can process at once, meaning it is the number of tokens to which the model can attend. Context length plays a crucial role in LLMs and affects their ability to retain and attend to information from very old sequences. This directly impacts the quality of tasks such as summarization, long-term planning, and coherence in conversations.
+
+Therefore, it is **essential to have a tokenizer that can efficiently compress and tokenize the input text in the smallest number of tokens possible**.
+
+The context length of some popular LLMs are as follows:
+
+* GPT-2: 1024 tokens
+* GPT-3: 2048 tokens
+* GPT-4: 32k tokens
+* Llama 1: 2,048 tokens
+* Llama 2: 4,096 tokens
