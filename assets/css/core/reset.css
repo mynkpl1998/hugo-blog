@@ -42,7 +42,7 @@ main,
 nav,
 section,
 table {
-    display: block;
+    
 }
 
 h1,
@@ -80,11 +80,8 @@ ul {
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0;
-    overflow-x: auto;
-    word-break: keep-all;
+    
+    
 }
 
 button,
