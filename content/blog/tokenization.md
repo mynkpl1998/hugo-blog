@@ -154,4 +154,44 @@ The context length of some popular LLMs are as follows:
 
 <br>
 
+### Unicode
 
+Unicode is a universal standard for character representation, assigning a unique code point (integer) to each character, regardless of platform, device, application, or language. It currently includes 149,813 characters across 161 scripts.
+
+Previously, ASCII was the primary encoding standard, but it was limited by its 7-bit encoding, which only supports 128 characters, enough for English but not other scripts.
+
+Unicode offers several encoding schemes:
+
+1. **UTF-8**: Uses one-four bytes per code point. (variable length)
+
+2. **UTF-16**: Uses one-two 16-bit units per code point. (variable length)
+3. **UTF-32**: Uses 32-bit per code point. (fixed length)
+
+UTF-8 is the most used due to its ASCII compatibility. The table below shows the UTF-8 conversion, where ‘x’ represents the bits of the code point. The graphs illustrate the space efficiency of UTF-8 compared to other encoding schemes.
+
+<table style="width:100% ">
+  <tr>
+    <td style="width:50%; text-align: center">
+        <img src="/blog-content/tokenization/utf_code_point_conversion.png" width="700px" title="Source: https://en.wikipedia.org/wiki/UTF-8"/>
+    </td>
+    <td style="text-align: center">
+        <br>
+        <p style="text-align: center">
+            Text: 오늘은 화창한 날이다 ☀️ (today is sunny day)
+        </p>
+        <img src="/blog-content/tokenization/utf_encoding_sizes_compared.png">
+    </td>
+  </tr>
+</table>
+
+Below is the snippet to encode the text to utf-8 encoding in python.
+
+```python
+# Convert the text into UTF-8 encoded string
+text = "오늘은 화창한 날이다 ☀️ (today is sunny day)"
+utf_8_encoded = text.encode("utf-8")
+print(utf_8_encoded) # b'\xec\x98\xa4\xeb\x8a\x98\xec\x9d\x80 \xed\x99\x94\xec\xb0\xbd\xed\x95\x9c \xeb\x82\xa0\xec\x9d\xb4\xeb\x8b\xa4 \xe2\x98\x80\xef\xb8\x8f (today is sunny day)
+
+# Calculate the size of the encoded string.
+print("Size of encoded string: ", len(utf_8_encoded)) # 57 Bytes
+```
