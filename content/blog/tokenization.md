@@ -195,3 +195,73 @@ print(utf_8_encoded) # b'\xec\x98\xa4\xeb\x8a\x98\xec\x9d\x80 \xed\x99\x94\xec\x
 # Calculate the size of the encoded string.
 print("Size of encoded string: ", len(utf_8_encoded)) # 57 Bytes
 ```
+
+<br>
+
+Since, unicode already maps the each character to a unique integer, may be we can use it directly for tokenization ? - Using Unicode for tokenization isn’t ideal due to two main reasons:
+
+1. Unicode’s 149,813 unique characters would result in a large vocabulary, increasing the size of the embedding and softmax layers.
+2. As new characters are added to Unicode regularly, the network would need frequent re-training.
+
+<br>
+
+### Byte-Pair Encoding
+
+It’s evident from earlier sections that an ideal tokenizer encodes text into the fewest tokens and has a manageable vocabulary size.
+
+Byte-Pair-Encoding (BPE) is a compression method that substitutes the most common byte pair with an unused byte. This byte is added to the vocabulary, creating a new one. This process continues until a set number of iterations are reached or all byte pairs in the input are unique. 
+
+Let’s look at an example for clarity.
+
+```
+# Initial text
+aaabdaaabac (length: 11)
+
+# Vocabulary
+a,b,c,d
+
+# Byte pairs and their counts
+'aa': 4
+'ab': 2
+'bd': 1
+'da': 1
+'ba': 1
+'ac': 1
+```
+
+Clearly, *'aa'* is the most frequent pairs. Lets  replace it with a new byte *'Z'*.
+
+```
+# New Text
+ZabdZabac (length: 9)
+
+# Vocabulary
+a,b,c,d,Z=aa
+
+# Byte pairs and their counts
+'Za': 2
+'ab': 2
+'bd': 1
+'dZ': 1
+'ba': 1
+'ac': 1
+```
+
+This time, *'Za'* and *'ab'* are the most frequent pairs. Lets take *'ab'* and replace it with a new byte *'X'*.
+
+```
+# New Text 
+ZXdZXac (length: 7)
+
+# Vocabulary
+a,b,c,d,Z=aa,X=ab
+
+# Byte pairs and their counts
+'ZX': 2
+'Xd': 1
+'dZ': 1
+'Xa': 1
+'ac': 1
+```
+
+Repeat this process until no byte pair repeats more than once.
