@@ -265,3 +265,191 @@ a,b,c,d,Z=aa,X=ab
 ```
 
 Repeat this process until no byte pair repeats more than once.
+
+<br>
+
+### Building a Tokenizer
+
+A tokenizer is independent of LLMs. It produces the output that LLMs process. Think of tokenization as a significant preprocessing step before any LLM-related tasks.
+
+<p align="center">
+    <img src="/blog-content/tokenization/llm_tokenization_flow.svg" />
+</p>
+
+We’ll create a tokenizer using BPE to encode raw UTF text into tokens and decode them back to raw text.
+
+#### Training Phase
+
+The first step in building the tokenizer is to train it on a sufficiently large dataset containing a variety of languages and code/non-code data. This allows the tokenizer to learn the necessary statistics for the BPE algorithm.
+The training process involves two main steps: first, obtaining byte pairs and their frequencies, followed by replacing them with new bytes and adding these new bytes to the vocabulary. This process is then repeated for a specified number of iterations to compress the text. The choice of the number of iterations is a hyperparameter—a higher number leads to a larger vocabulary size and fewer tokens, but it’s essential to strike the right balance.
+
+<p align="center">
+    <img src="/blog-content/tokenization/tokenizer_steps.svg" />
+</p>
+
+```python
+def get_tokens(utf_text):
+    """
+    Accepts a UTF-8 encoded byte string and returns a
+    list of tokens, where each byte is mapped to an
+    integer between 0 and 255.
+    """
+    tokens = [ int(b) for b in utf_text ]
+    return tokens
+
+def get_pairs(tokens_list):
+    """
+    This function takes a list of tokens, performs byte
+    pairing, and returns a dictionary containing all
+    byte pairs along with their frequencies.
+    """
+    token_list_len = len(tokens_list)
+    idx = 0
+    pairs = {}
+    for idx in range(token_list_len-1):
+        p = (tokens_list[idx], tokens_list[idx+1])
+        if p not in pairs.keys():
+            pairs[p] = 1
+        else:
+            pairs[p] += 1
+
+def replace_with(tokens, pair_to_replace, replace_with):
+    """
+    This function accepts the list of tokens along
+    with the pair of byte pair to be replaced with.
+    Returns a new token list where all the occurrence
+    of the pair is replaced with new byte.
+    """
+    new_tokens = []
+    idx = 0
+    while(idx < len(tokens)):
+        if (idx < len(tokens)-1) and (tokens[idx] == pair_to_replace[0]) and (tokens[idx+1] == pair_to_replace[1]):
+            new_tokens.append(replace_with)
+            idx += 2
+        else:
+            new_tokens.append(tokens[idx])
+            idx += 1
+        return new_tokens
+
+
+# Tokenizer training starts 
+
+# Read Tokenizer training text in utf-8 format.
+with open('filename.txt', 'r', encoding='utf-8') as file:
+    content = file.read()
+
+# Get the tokens list
+tokens = get_tokens(content)
+
+# Number of iters to repeat
+num_iters = 10
+
+# new vocab token index
+new_token_idx = 256  # 0-255 is already in use.
+
+# Keep track of all the newly created pairs  - order must be retained
+merges_dict = {}
+
+for iter in range(0, num_iters):
+
+  pairs = get_pairs(tokens)
+
+  # Get most frequent pair
+  max_pair = max(pairs, key=pairs.get)
+  max_pair_frq = pairs[max_pair]
+
+  # Replace the most frequent pair with a new single token
+  if max_pair_frq > 1:
+    new_tokens = replace_pair(tokens, max_pair, new_token_idx)
+    assert len(new_tokens) == len(tokens) - max_pair_frq
+
+    if max_pair not in merges_dict.keys():
+      merges_dict[max_pair] = new_token_idx
+
+    new_token_idx += 1
+    tokens = new_tokens
+
+  print("Iter %d done. Number of tokens: %d. Most freq Pair: %s, Freq: %d."%(iter+1, len(new_tokens), max_pair, max_pair_frq))
+```
+
+#### Encoding
+
+After training the tokenizer, we can now encode any UTF-text using it. The following code snippet demonstrates this process.
+
+```python
+def encode(text):
+  """
+    Encodes the input text into tokens.
+    
+    Args:
+        text (bytes): Input text in UTF-8 format.
+        
+    Returns:
+        list: List of raw tokens.
+  """
+  raw_tokens = [ int(t) for t in text ]
+  
+  # Get all initial byte pairs
+  pairs = get_pairs(raw_tokens)
+
+  # Iterate in same order of merges
+  for p in merges_dict.keys():
+    if p in pairs.keys():
+      # Replace the p
+      new_tokens = replace_pair(raw_tokens, p, merges_dict[p])
+      raw_tokens = new_tokens
+
+      # Re-calculate new byte pairs
+      pairs = get_pairs(raw_tokens)
+
+  return raw_tokens
+
+enc_tokens = encode("hello world!".encode("utf-8"))
+```
+
+#### Decoding
+
+The decoding can be done by iterating over the encoded tokens and checking if they lie in *merges_dict*. For convince, we would need to create a reverse dict of *merges_dict* to map byte to pairs. 
+
+Note: It is important to handle utf-8 decoding errors. The LLMs may spit out invalid utf-8 code points. When handling UTF-8 decoding errors, set the error mode to “*replace*” to avoid crashes due to invalid characters. This allows continued processing even if some parts are corrupted.
+
+```Python
+# Create a reverse merge dict 
+reversed_merge_dict = {}
+for k,v in merges_dict.items():
+  reversed_merge_dict[v] = k
+
+def decode(tokens):
+  """
+    Decodes a list of tokens back into text.
+
+    Args:
+        tokens (list): List of tokens representing encoded data.
+
+    Returns:
+        bytes: Decoded text in UTF-8 format.
+  """
+  decoded_tokens = []
+  for token in tokens:
+    if token in reversed_merge_dict.keys():
+      
+      p = list(reversed_merge_dict[token])
+      while True:
+        reverse_merge_set = set(reversed_merge_dict.keys())
+        p_set = set(p)
+        intersec = reverse_merge_set & p_set
+        if len(intersec) > 0:
+          replace_p = list(intersec)[0]
+          index = p.index(replace_p)
+          replace_p_tuple = list(reversed_merge_dict[replace_p])
+          p = p[0:index] + replace_p_tuple + p[index+1:]
+        else:
+          break
+      
+      decoded_tokens += p
+    else:
+      decoded_tokens += [token] 
+  return bytes(decoded_tokens)
+
+decoded_tokens = decode(enc_tokens).decode("utf-8", "replace")
+```
