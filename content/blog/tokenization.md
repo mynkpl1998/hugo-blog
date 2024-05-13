@@ -389,18 +389,20 @@ def encode(text):
   """
   raw_tokens = [ int(t) for t in text ]
   
-  # Get all initial byte pairs
-  pairs = get_pairs(raw_tokens)
+  if len(raw_tokens) >= 2:
 
-  # Iterate in same order of merges
-  for p in merges_dict.keys():
-    if p in pairs.keys():
-      # Replace the p
-      new_tokens = replace_pair(raw_tokens, p, merges_dict[p])
-      raw_tokens = new_tokens
+    # Get all initial byte pairs
+    pairs = get_pairs(raw_tokens)
 
-      # Re-calculate new byte pairs
-      pairs = get_pairs(raw_tokens)
+    # Iterate in same order of merges
+    for p in merges_dict.keys():
+      if p in pairs.keys():
+        # Replace the p
+        new_tokens = replace_pair(raw_tokens, p, merges_dict[p])
+        raw_tokens = new_tokens
+
+        # Re-calculate new byte pairs
+        pairs = get_pairs(raw_tokens)
 
   return raw_tokens
 
@@ -411,7 +413,7 @@ enc_tokens = encode("hello world!".encode("utf-8"))
 
 The decoding can be done by iterating over the encoded tokens and checking if they lie in *merges_dict*. For convince, we would need to create a reverse dict of *merges_dict* to map byte to pairs. 
 
-Note: It is important to handle utf-8 decoding errors. The LLMs may spit out invalid utf-8 code points. When handling UTF-8 decoding errors, set the error mode to “*replace*” to avoid crashes due to invalid characters. This allows continued processing even if some parts are corrupted.
+*Note: It is important to handle utf-8 decoding errors. The LLMs may spit out invalid utf-8 code points. When handling UTF-8 decoding errors, set the error mode to “*replace*” to avoid crashes due to invalid characters. This allows continued processing even if some parts are corrupted.*
 
 ```Python
 # Create a reverse merge dict 
@@ -453,3 +455,33 @@ def decode(tokens):
 
 decoded_tokens = decode(enc_tokens).decode("utf-8", "replace")
 ```
+
+<br>
+
+### Forced Splits in GPT-2
+
+The GPT-2 researchers noticed that Byte-Pair Encoding (BPE) merges could result in multiple versions of common words, such as ‘dog,’ ‘dog!,’ and ‘dog?.’ BPE was merging based on punctuation, which was suboptimal because it assigned different vocabulary slots to the same word.
+
+To address this issue, they introduced a rule for splitting input text. These rules were specified using a regex pattern. The regex pattern for GPT-2 is as follows.
+
+```python
+import regex as re
+
+# Taken from GPT-2 encoder.py - https://github.com/openai/gpt-2/blob/9b63575ef42771a015060c964af2c3da4cf7c8ab/src/encoder.py#L53C9-L53C113
+self.pat = re.compile(r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
+
+print(re.findall(self, "hello've world123 how are you!!!?"))
+# ['hello', ''ve', ' world', '123', ' how', ' are', ' you', '!!!?']
+```
+
+This pattern consists of several alternatives and splits the text if any of them matches.
+
+- Contractions: The initial seven patterns detect contractions and split tokens accordingly.
+- Letters/Characters with Optional Space: The pattern `\p{L}+` represents any sequence of letters or characters, which may include optional spaces at the start.
+- Numeric Characters with Optional Space: The pattern `\p{N}+` matches any sequence of numeric characters (digits), with optional spaces at the beginning.
+- Non-Letters, Non-Numbers (Punctuation and Special Characters): The pattern `[^\s\p{L}\p{N}]` identifies any character that is not a space, letter, or number. It specifically targets punctuation marks and other special characters.
+- Whitespace Excluding the Last Space: The expression `\s+(?!\S)|\s+` captures any whitespace (spaces, tabs) except for the last space in a sequence.
+
+Once the input text is split, each splited runs BPE through seperately and come up with its compressed form. These BPE merged individual tokens are then concatenated together to form the input. This is done to avoid unwanted pairing/merging of the tokens.
+
+The GPT-4 introduced a better regex pattern.
