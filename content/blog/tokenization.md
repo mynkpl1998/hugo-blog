@@ -293,174 +293,253 @@ def get_tokens(utf_text):
     Accepts a UTF-8 encoded byte string and returns a
     list of tokens, where each byte is mapped to an
     integer between 0 and 255.
+
+    Args:
+        utf_text (bytes): A UTF-8 encoded byte string.
+
+    Returns:
+        list: A list of integers representing the tokens.
+
+    Example:
+        >>> utf_text = b"Hello, world!"
+        >>> get_tokens(utf_text)
+        [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]
     """
     tokens = [ int(b) for b in utf_text ]
     return tokens
 
 def get_pairs(tokens_list):
     """
-    This function takes a list of tokens, performs byte
-    pairing, and returns a dictionary containing all
-    byte pairs along with their frequencies.
+    Generates byte pairs from a list of tokens and returns
+    a dictionary containing each unique byte pair along
+    with its frequency.
+
+    Args:
+        tokens_list (list): A list of tokens (integers).
+
+    Returns:
+        dict: A dictionary where keys are byte pairs (tuples)
+              and values are the frequency of each pair.
+
+    Example:
+        >>> tokens = [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]
+        >>> get_pairs(tokens)
+        {(72, 101): 1, (101, 108): 2, (108, 111): 1, (111, 44): 1, (44, 32): 1,
+         (32, 119): 1, (119, 111): 1, (111, 114): 1, (114, 108): 1, (108, 100): 1,
+         (100, 33): 1}
+
+    Note:
+        The input `tokens_list` should be a list of integer tokens.
+        The `stats` parameter (optional) allows updating an existing dictionary.
     """
     token_list_len = len(tokens_list)
-    idx = 0
-    pairs = {}
+    stats = {} if stats is None else stats 
     for idx in range(token_list_len-1):
         p = (tokens_list[idx], tokens_list[idx+1])
-        if p not in pairs.keys():
-            pairs[p] = 1
+        if p not in stats.keys():
+            stats[p] = 1
         else:
-            pairs[p] += 1
+            stats[p] += 1
+    return stats
 
-def replace_with(tokens, pair_to_replace, replace_with):
+def merge(tokens, pair_to_replace, replace_with):
     """
-    This function accepts the list of tokens along
-    with the pair of byte pair to be replaced with.
-    Returns a new token list where all the occurrence
-    of the pair is replaced with new byte.
+    Replaces occurrences of a specific byte pair in a list of tokens
+    with a new byte value.
+
+    Args:
+        tokens (list): A list of integers representing tokens.
+        pair_to_replace (tuple): A tuple containing the byte pair to be replaced.
+        replace_with (int): The new byte value to replace the specified pair.
+
+    Returns:
+        list: A new list of tokens with the specified pair replaced.
+
+    Example:
+        >>> tokens = [72, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33]
+        >>> pair_to_replace = (108, 111)
+        >>> replace_with = 999
+        >>> merge(tokens, pair_to_replace, replace_with)
+        [72, 101, 108, 999, 44, 32, 119, 111, 114, 108, 100, 33]
     """
     new_tokens = []
     idx = 0
     while(idx < len(tokens)):
-        if (idx < len(tokens)-1) and (tokens[idx] == pair_to_replace[0]) and (tokens[idx+1] == pair_to_replace[1]):
+        if (idx < len(tokens)-1) and (tokens[idx] == pair_to_replace[0]) and \
+           (tokens[idx+1] == pair_to_replace[1]):
             new_tokens.append(replace_with)
             idx += 2
         else:
             new_tokens.append(tokens[idx])
             idx += 1
-        return new_tokens
+    return new_tokens
 
 
-# Tokenizer training starts 
+class Tokenizer:
 
-# Read Tokenizer training text in utf-8 format.
-with open('filename.txt', 'r', encoding='utf-8') as file:
-    content = file.read()
+  """
+    A class that implements a simple Byte-Pair Encoding (BPE) based tokenizer.
 
-# Get the tokens list
-tokens = get_tokens(content)
+    Attributes:
+        merges (dict): A dictionary mapping (int, int) pairs to new integer indices.
+        vocab (dict): A dictionary mapping integer indices to bytes.
 
-# Number of iters to repeat
-num_iters = 10
+    Methods:
+        __init__(): Initializes the Tokenizer object.
+        _build_vocab(): Builds the initial vocabulary.
+        train(text: str, vocabSize: int, verbose: bool = True): Trains the tokenizer on input text.
+        encode(text: str) -> List[int]: Encodes input text into a list of integer tokens.
+        decode(tokens: List[int]) -> str: Decodes a list of integer tokens into text.
+    """
 
-# new vocab token index
-new_token_idx = 256  # 0-255 is already in use.
+  def __init__(self):
+    """
+    Initializes the Tokenizer object.
+    """
+    self.merges = {} # (int, int) -> int
+    self.vocab = self._build_vocab() # int -> bytes
+  
+  def _build_vocab(self):
+    """
+    Builds the initial vocabulary.
 
-# Keep track of all the newly created pairs  - order must be retained
-merges_dict = {}
+    Returns:
+        dict: A dictionary mapping integer indices to bytes.
+    """
+    vocab = {idx: bytes([idx]) for idx in range(0, 256) }
+    return vocab
+  
+  def train(self, text: str, vocabSize: int, verbose: bool=True):
+    """
+    Trains the tokenizer on input text.
 
-for iter in range(0, num_iters):
+    Args:
+        text (str): Input text for training.
+        vocabSize (int): Desired vocabulary size (must be greater than 256).
+        verbose (bool, optional): Whether to print training progress. Defaults to True.
+    """
+    assert vocabSize > 256
+    numMerges = vocabSize - 256
 
-  pairs = get_pairs(tokens)
+    # Convert text to bytes
+    utf_text = text.encode("utf-8")
+    # list of tokens - get_tokens()
+    ids = get_tokens(utf_text)
+    
+    merges = {} # (int, int) -> (int)
+    for i in range(numMerges):
 
-  # Get most frequent pair
-  max_pair = max(pairs, key=pairs.get)
-  max_pair_frq = pairs[max_pair]
+      # Get the pair and their freq
+      pairs_stat = get_pairs(ids)
+      
+      # Find the most freq pair
+      max_freq_pair = max(pairs_stat, key=pairs_stat.get)
+      freq = pairs_stat[max_freq_pair]
 
-  # Replace the most frequent pair with a new single token
-  if max_pair_frq > 1:
-    new_tokens = replace_pair(tokens, max_pair, new_token_idx)
-    assert len(new_tokens) == len(tokens) - max_pair_frq
+      # Get the new byte to replace with
+      new_idx = 256 + i
 
-    if max_pair not in merges_dict.keys():
-      merges_dict[max_pair] = new_token_idx
+      # Replace the most freq pair
+      ids = merge(ids, max_freq_pair, new_idx)
+      
+      # Save the merge and update vocab
+      merges[max_freq_pair] = new_idx
+      self.vocab[new_idx] = self.vocab[max_freq_pair[0]] + self.vocab[max_freq_pair[1]]
 
-    new_token_idx += 1
-    tokens = new_tokens
+      if verbose:
+        print("Iter: %d, Num Merges: %d, Vocab Size: %d."%(i+1, len(merges), len(self.vocab)))
 
-  print("Iter %d done. Number of tokens: %d. Most freq Pair: %s, Freq: %d."%(iter+1, len(new_tokens), max_pair, max_pair_frq))
+    self.merges = merges
+  
+  def encode(self, text):
+    """
+    Encodes input text into a list of integer tokens.
+
+    Args:
+        text (str): Input text to encode.
+
+    Returns:
+        List[int]: List of integer tokens.
+    """
+    raise NotImplementedError
+  
+  def decode(self, tokens):
+    """
+    Decodes a list of integer tokens into text.
+
+    Args:
+        tokens (List[int]): List of integer tokens.
+
+    Returns:
+        str: Decoded text.
+    """
+    raise NotImplementedError
 ```
-
 #### Encoding
 
-After training the tokenizer, we can now encode any UTF-text using it. The following code snippet demonstrates this process.
+After training the tokenizer, we can encode any text by first converting it into the UTF-8 format and then applying the Byte-Pair Encoding (BPE) merges. Let's update our encode method.
 
 ```python
-def encode(text):
+def encode(self, text):
   """
-    Encodes the input text into tokens.
-    
-    Args:
-        text (bytes): Input text in UTF-8 format.
-        
-    Returns:
-        list: List of raw tokens.
+  Encodes input text into a list of integer tokens.
+
+  Args:
+      text (str): Input text to encode.
+
+  Returns:
+      List[int]: List of integer tokens.
   """
-  raw_tokens = [ int(t) for t in text ]
-  
-  if len(raw_tokens) >= 2:
+  # Convert text to bytes
+  utf_text = text.encode("utf-8")
+  # list of tokens - get_tokens()
+  ids = get_tokens(utf_text)
+
+  # Encode only if there is anything to merge.
+  if len(ids) >= 2 and len(self.merges) > 0:
 
     # Get all initial byte pairs
-    pairs = get_pairs(raw_tokens)
+    pairs = get_pairs(ids)
 
-    # Iterate in same order of merges
-    for p in merges_dict.keys():
-      if p in pairs.keys():
-        # Replace the p
-        new_tokens = replace_pair(raw_tokens, p, merges_dict[p])
-        raw_tokens = new_tokens
+    # Iterate over all the merged pairs and replace it.
+    for p in self.merges.keys():
+      
+      if p in pairs():  
+        # Call merge function to replace the pair with the merged byte
+        new_ids = merge(ids, p, self.mergs[p])
+        ids = new_ids
 
-        # Re-calculate new byte pairs
-        pairs = get_pairs(raw_tokens)
-
-  return raw_tokens
-
-enc_tokens = encode("hello world!".encode("utf-8"))
+        # Re-calculate pairs
+        pairs = get_pairs(ids)
+  return ids
 ```
 
 #### Decoding
 
-The decoding can be done by iterating over the encoded tokens and checking if they lie in *merges_dict*. For convince, we would need to create a reverse dict of *merges_dict* to map byte to pairs. 
+The decoding process involves iterating over the encoded tokens and concatenating the corresponding bytes from the vocabulary. Let's update our decode method.
 
 *Note: It is important to handle utf-8 decoding errors. The LLMs may spit out invalid utf-8 code points. When handling UTF-8 decoding errors, set the error mode to “*replace*” to avoid crashes due to invalid characters. This allows continued processing even if some parts are corrupted.*
 
 ```Python
-# Create a reverse merge dict 
-reversed_merge_dict = {}
-for k,v in merges_dict.items():
-  reversed_merge_dict[v] = k
-
-def decode(tokens):
+def decode(self, tokens):
   """
-    Decodes a list of tokens back into text.
+  Decodes a list of integer tokens into text.
 
-    Args:
-        tokens (list): List of tokens representing encoded data.
+  Args:
+      tokens (List[int]): List of integer tokens.
 
-    Returns:
-        bytes: Decoded text in UTF-8 format.
+  Returns:
+      str: Decoded text.
   """
-  decoded_tokens = []
-  for token in tokens:
-    if token in reversed_merge_dict.keys():
-      
-      p = list(reversed_merge_dict[token])
-      while True:
-        reverse_merge_set = set(reversed_merge_dict.keys())
-        p_set = set(p)
-        intersec = reverse_merge_set & p_set
-        if len(intersec) > 0:
-          replace_p = list(intersec)[0]
-          index = p.index(replace_p)
-          replace_p_tuple = list(reversed_merge_dict[replace_p])
-          p = p[0:index] + replace_p_tuple + p[index+1:]
-        else:
-          break
-      
-      decoded_tokens += p
-    else:
-      decoded_tokens += [token] 
-  return bytes(decoded_tokens)
-
-decoded_tokens = decode(enc_tokens).decode("utf-8", "replace")
+  text_bytes = b"".join([self.vocab[idx] for idx in tokens])
+  return text_bytes.decode("utf-8", errors="replace")
 ```
 
 <br>
 
-### Forced Splits in GPT-2
+### Regex-Based Rules for BPE in GPT-2
 
-The GPT-2 researchers noticed that Byte-Pair Encoding (BPE) merges could result in multiple versions of common words, such as ‘dog,’ ‘dog!,’ and ‘dog?.’ BPE was merging based on punctuation, which was suboptimal because it assigned different vocabulary slots to the same word.
+The GPT-2 researchers noticed that Byte-Pair Encoding (BPE) merges could result in multiple versions of common words, such as ‘dog,’ ‘dog!,’ and ‘dog?.’ BPE was merging based on punctuation, which was suboptimal because it assigned different vocabulary slots to the same word. 
 
 To address this issue, they introduced a rule for splitting input text. These rules were specified using a regex pattern. The regex pattern for GPT-2 is as follows.
 
@@ -468,9 +547,9 @@ To address this issue, they introduced a rule for splitting input text. These ru
 import regex as re
 
 # Taken from GPT-2 encoder.py - https://github.com/openai/gpt-2/blob/9b63575ef42771a015060c964af2c3da4cf7c8ab/src/encoder.py#L53C9-L53C113
-self.pat = re.compile(r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
+pat = re.compile(r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
 
-print(re.findall(self, "hello've world123 how are you!!!?"))
+print(re.findall(pat, "hello've world123 how are you!!!?"))
 # ['hello', ''ve', ' world', '123', ' how', ' are', ' you', '!!!?']
 ```
 
@@ -481,6 +560,63 @@ This pattern consists of several alternatives and splits the text if any of them
 - Numeric Characters with Optional Space: The pattern `\p{N}+` matches any sequence of numeric characters (digits), with optional spaces at the beginning.
 - Non-Letters, Non-Numbers (Punctuation and Special Characters): The pattern `[^\s\p{L}\p{N}]` identifies any character that is not a space, letter, or number. It specifically targets punctuation marks and other special characters.
 - Whitespace Excluding the Last Space: The expression `\s+(?!\S)|\s+` captures any whitespace (spaces, tabs) except for the last space in a sequence.
+
+After applying the input text to the regex pattern, it is split into multiple text tokens. Each of these tokens is then encoded in UTF-8 format and merged using Byte-Pair Encoding (BPE). 
+To support the regex based split, we would need to update our Tokenizer class.
+
+```python
+def __init__(self):
+  """
+  Initializes the Tokenizer object.
+  """
+  self.merges = {} # (int, int) -> int
+  self.vocab = self._build_vocab() # int -> bytes
+  # Defines a regex pattern to split the input text
+  self.regex_pat = re.compile(r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
+
+def train(self, text: str, vocabSize: int, verbose: bool=True):
+  """
+  Trains the tokenizer on input text.
+
+  Args:
+      text (str): Input text for training.
+      vocabSize (int): Desired vocabulary size (must be greater than 256).
+      verbose (bool, optional): Whether to print training progress. Defaults to True.
+  """
+  assert vocabSize > 256
+  numMerges = vocabSize - 256
+
+
+  # Convert text to bytes
+  utf_text = text.encode("utf-8")
+  # list of tokens - get_tokens()
+  ids = get_tokens(utf_text)
+  
+  merges = {} # (int, int) -> (int)
+  for i in range(numMerges):
+
+    # Get the pair and their freq
+    pairs_stat = get_pairs(ids)
+    
+    # Find the most freq pair
+    max_freq_pair = max(pairs_stat, key=pairs_stat.get)
+    freq = pairs_stat[max_freq_pair]
+
+    # Get the new byte to replace with
+    new_idx = 256 + i
+
+    # Replace the most freq pair
+    ids = merge(ids, max_freq_pair, new_idx)
+    
+    # Save the merge and update vocab
+    merges[max_freq_pair] = new_idx
+    self.vocab[new_idx] = self.vocab[max_freq_pair[0]] + self.vocab[max_freq_pair[1]]
+
+    if verbose:
+      print("Iter: %d, Num Merges: %d, Vocab Size: %d."%(i+1, len(merges), len(self.vocab)))
+
+  self.merges = merges
+```
 
 Once the input text is split, each splited runs BPE through seperately and come up with its compressed form. These BPE merged individual tokens are then concatenated together to form the input. This is done to avoid unwanted pairing/merging of the tokens.
 
