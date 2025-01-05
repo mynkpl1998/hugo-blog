@@ -11,3 +11,8 @@ math = true
 <p align="center">
     <img src="/blog-content/fundamentals_embedded_software/Chapter1.png" />
 </p>
+
+## Data Representation
+<p align="center">
+    <img src="/blog-content/fundamentals_embedded_software/Chapter2.png" />
+</p>
